@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "scripts": {    
+  "scripts": {
     "start": "concurrently \"npm run start-server\" \"npm run start-client\"",
     "start-client": "cd client && npm start",
     "start-server": "node server.js",
