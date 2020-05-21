@@ -41,7 +41,7 @@ export default class App extends Component {
     sorted_all_students: [],
   };
 
-  // inital call to assign state
+  // inital call to sort and assign state
   componentDidMount() {
     axios.get("/grades").then((response) => {
       const sorted_last_names = response.data.sort(
@@ -71,6 +71,7 @@ export default class App extends Component {
           </HeaderColumn>
           <HeaderColumn>GRADE</HeaderColumn>
         </Header>
+        {/* passing props to Grades component */}
         <Grades students={this.state.sorted_all_students} />
       </Body>
     );
