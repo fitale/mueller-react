@@ -1,39 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { css, cx } from "emotion";
+import { css } from "emotion";
 import styled from "@emotion/styled";
 
+import Grades from "./components/Grades";
+
 // default styles
-const Name = styled.h5`
-  width: 50%;
-  margin: 0;
-  height: 100%;
-  border-right: 0.0625rem solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Grade = styled.h5`
-  width: 50%;
-  margin: 0;
-  height: 100%;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const DisplayedStudentContainer = styled.div`
-  display: flex;
-  border-bottom: 0.0625rem solid #fff;
-  height: 5rem;
-`;
-
-const HiddenStudentContainer = styled.div`
-  display: none;
-`;
-
 const Header = styled.header`
   height: 6.25rem;
   display: flex;
@@ -50,7 +22,7 @@ const HeaderColumn = styled.h3`
   justify-content: space-evenly;
 `;
 
-const Body = styled.body`
+const Body = styled.div`
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -66,67 +38,26 @@ const Body = styled.body`
 `;
 export default class App extends Component {
   state = {
-    all_students: [],
+    sorted_all_students: [],
   };
 
   // inital call to assign state
   componentDidMount() {
-    axios
-      .get("/grades")
-      .then((response) => this.setState({ all_students: response.data }));
+    axios.get("/grades").then((response) => {
+      const sorted_last_names = response.data.sort(
+        (a, b) =>
+          (a.last_name.toLowerCase() > b.last_name.toLowerCase()) -
+          (a.last_name.toLowerCase() < b.last_name.toLowerCase())
+      );
+      this.setState({
+        sorted_all_students: sorted_last_names,
+      });
+    });
   }
 
   render() {
-    // sort students by last name
-    const sorted_last_names = this.state.all_students.sort((a, b) =>
-      a.last_name.localeCompare(b.last_name)
-    );
-
-    // map through student grades
-    const table_data = sorted_last_names.map((student) => {
-      // if student grade is < 50, {display: none}
-      return student.grade < 50 ? (
-        <HiddenStudentContainer key={student.id}></HiddenStudentContainer>
-      ) : // if student grade is < 65, {color: red}
-      student.grade < 65 ? (
-        <DisplayedStudentContainer key={student.id}>
-          <Name>
-            {student.last_name}, {student.first_name}
-          </Name>
-          <Grade
-            className={css`
-              color: red;
-            `}
-          >
-            {student.grade}
-          </Grade>
-        </DisplayedStudentContainer>
-      ) : // if student grade is >= 85, {color: green}
-      student.grade >= 85 ? (
-        <DisplayedStudentContainer key={student.id}>
-          <Name>
-            {student.last_name}, {student.first_name}
-          </Name>
-          <Grade
-            className={css`
-              color: green;
-            `}
-          >
-            {student.grade}
-          </Grade>
-        </DisplayedStudentContainer>
-      ) : (
-        // if student grade is between 65 and 85, use default styling
-        <DisplayedStudentContainer key={student.id}>
-          <Name>
-            {student.last_name}, {student.first_name}
-          </Name>
-          <Grade>{student.grade}</Grade>
-        </DisplayedStudentContainer>
-      );
-    });
     // render html
-    return this.state.all_students.length === 0 ? (
+    return this.state.sorted_all_students.length === 0 ? (
       <h1>loading...</h1>
     ) : (
       <Body>
@@ -140,7 +71,7 @@ export default class App extends Component {
           </HeaderColumn>
           <HeaderColumn>GRADE</HeaderColumn>
         </Header>
-        <main>{table_data}</main>
+        <Grades students={this.state.sorted_all_students} />
       </Body>
     );
   }
